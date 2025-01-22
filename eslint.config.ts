@@ -1,24 +1,26 @@
-import { Linter } from "eslint";
+const { FlatConfig } = require("eslint");
 
-const config: Linter.FlatConfig[] = [
+const config = [
     {
         files: ["**/*.ts", "**/*.tsx"],
         languageOptions: {
-            parser: "@typescript-eslint/parser",
+            parser: require("@typescript-eslint/parser"),
             parserOptions: {
                 ecmaVersion: "latest",
                 sourceType: "module",
+                project: "./tsconfig.json", // Asigură-te că acest fișier există!
             },
         },
         plugins: {
             "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
         },
         rules: {
+            "@typescript-eslint/no-unused-vars": "error",
+            "@typescript-eslint/explicit-function-return-type": "warn",
             "semi": ["error", "always"],
             "quotes": ["error", "double"],
-            "@typescript-eslint/no-unused-vars": "warn",
         },
     },
 ];
 
-export default config;
+module.exports = config;

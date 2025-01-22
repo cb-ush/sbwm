@@ -24,11 +24,15 @@ import path from "path";
 
 dotenv.config();
 
+const PROGRAM_IDS: PublicKey[] = [
+    new PublicKey("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8")
+]
+
 const WALLET_IDS: string[] = [
 
 ]
 
-class Monitor {
+class Monitoring {
     private connection: Connection | null = null;
     private subscriptionIds: number[] = []; // Store WebSocket subscription IDs
 
@@ -54,15 +58,15 @@ class Monitor {
         });
 
         // Subscribe to each program ID
-        for (const walletId of WALLET_IDS) {
+        for (const programId of PROGRAM_IDS) {
             const subscriptionId = this.connection.onLogs(
-                new PublicKey(walletId),
+                programId,
                 async (logs: Logs) => {
                     await this.handleLogs(logs);
                 }
             );
             this.subscriptionIds.push(subscriptionId);
-            console.log(`Subscribed to logs for program: ${walletId}`);
+            console.log(`Subscribed to logs for program: ${programId.toBase58()}`);
         }
 
     }
@@ -76,10 +80,16 @@ class Monitor {
      *                         Also handles logging any potential errors.
      */
     private async handleLogs(logs: Logs): Promise<void> {
-        const { signature, logs: logMessages } = logs;
+        const { signature } = logs;
+
+        // Ignore TX with errors
+        if (logs.err) {
+            return ;
+        }
 
         try {
-            console.log(`Processing logs for transaction ${signature}...`);
+
+            console.log(`Processing logs for transaction ${signature}...`, logs);
         } catch (error) {
             console.error(`Error processing logs for transaction ${signature}:`, error);
         }
@@ -101,4 +111,4 @@ class Monitor {
     }
 }
 
-export default Monitor;
+export default Monitoring;

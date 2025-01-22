@@ -1,0 +1,53 @@
+steps:
+  - name: gcr.io/cloud-builders/gcloud
+    id: 'check-image'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if gcloud container images list-tags europe-west1-docker.pkg.dev/$PROJECT_ID/cb-ush/sbwm \
+          --filter="tags:$SHORT_SHA" --format="get(tags)" | grep -q "$SHORT_SHA"; then
+          echo "Image already exists."
+          echo -n "true" > /workspace/image_exists.txt
+        else
+          echo "Image does not exist."
+          echo -n "false" > /workspace/image_exists.txt
+        fi
+
+  - name: gcr.io/cloud-builders/docker
+    id: 'build-and-push'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        if grep -q "false" /workspace/image_exists.txt; then
+          docker build -t europe-west1-docker.pkg.dev/$PROJECT_ID/cb-ush/sbwm:$SHORT_SHA .
+          docker push europe-west1-docker.pkg.dev/$PROJECT_ID/cb-ush/sbwm:$SHORT_SHA
+        else
+          echo "Skipping build and push steps."
+        fi
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        _PGSQL_PASSWORD=$(gcloud secrets versions access latest --secret=$_PGSQL_PASSWORD_SECRET) && 
+        gcloud run deploy stbv2-$_BRANCH_NAME \
+            --image=europe-west1-docker.pkg.dev/$PROJECT_ID/cb-ush/sbwm:$SHORT_SHA \
+            --region=europe-west1 --platform=managed \
+            --allow-unauthenticated \
+            --max-instances 1 \
+            --min-instances 1 \
+            --set-env-vars=SOLANA_HTTP_ENDPOINT=$_SOLANA_HTTP_ENDPOINT,SOLANA_WSS_ENDPOINT=$_SOLANA_WSS_ENDPOINT
+
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+
+substitutions:
+  _BRANCH_NAME: $BRANCH_NAME
+  _SOLANA_HTTP_ENDPOINT: ''
+  _SOLANA_WSS_ENDPOINT: ''
+
+
+

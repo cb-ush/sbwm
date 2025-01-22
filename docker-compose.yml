@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sbwm
+    env_file:
+      - .env
+    command: npm start
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    restart: on-failure

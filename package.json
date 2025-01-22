@@ -1,0 +1,32 @@
+{
+  "name": "sbwm",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx ts-node --project tsconfig.json src/index.ts",
+    "test": "mocha --require ts-node/register 'test/**/*.ts'",
+    "build": "npx tsc",
+    "prepare": "npm run build",
+    "lint": "npx eslint src"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/ioredis": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "eslint": "^9.18.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.9.1",
+    "@solana/web3.js": "^1.98.0",
+    "discord.js": "^14.17.2",
+    "dotenv": "^16.4.7",
+    "ioredis": "^5.4.2"
+  }
+}

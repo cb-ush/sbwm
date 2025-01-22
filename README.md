@@ -14,3 +14,4 @@
 - Educație și conștientizare
 - Conformitate continuă (Compliance as Code)
 - Abordare bazată pe riscuri
+
